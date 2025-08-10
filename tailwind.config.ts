@@ -14,7 +14,7 @@ const config: Config = {
       // so you can use classes like 'font-sans' and 'font-serif'.
       fontFamily: {
         sans: ['var(--font-inter)'],
-        serif: ['var(--font-lora)'],
+        serif: ['var(--font-caslon)'],
       },
 
       // 2. Custom Animations and Keyframes

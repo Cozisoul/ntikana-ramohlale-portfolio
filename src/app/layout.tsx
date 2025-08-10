@@ -1,36 +1,34 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next';
-import { Inter, Lora } from 'next/font/google'; // Import from next/font
+// Import Libre Caslon Display instead of Lora
+import { Inter, Libre_Caslon_Display } from 'next/font/google';
 import './globals.css';
 import 'yet-another-react-lightbox/styles.css';
+import 'yet-another-react-lightbox/plugins/captions.css';
+import 'yet-another-react-lightbox/plugins/thumbnails.css';
+
 import Header from './components/Header';
 import Footer from './components/Footer';
+import SmoothScroller from './components/SmoothScroller';
+// We will create this component in the next step
+import PageTransition from './components/PageTransition';
 
-// Configure the fonts
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-inter', // Use CSS variable
+  variable: '--font-inter',
   display: 'swap',
 });
 
-const lora = Lora({
+// Configure the new headline font
+const libre_caslon = Libre_Caslon_Display({
   subsets: ['latin'],
-  variable: '--font-lora', // Use CSS variable
+  variable: '--font-caslon',
+  weight: '400',
   display: 'swap',
 });
 
-// Update Metadata for better SEO
 export const metadata: Metadata = {
-  title: 'Ntikana Ramohlale — Documentary Portfolio',
-  description: 'Editorial, humanist documentary photography by Ntikana Ramohlale.',
-  // Important for social sharing links: replace with your actual domain
-  metadataBase: new URL('https://your-domain.com'),
-  openGraph: {
-    title: 'Ntikana Ramohlale — Documentary Portfolio',
-    description: 'Selected works by visual storyteller Ntikana Ramohlale.',
-    // Add a default sharing image at public/og-image.jpg (1200x630px)
-    // images: ['/og-image.jpg'],
-  },
+  // ... (metadata remains the same)
 };
 
 export default function RootLayout({
@@ -39,10 +37,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${lora.variable}`}>
+    // Add the new font variable to the html tag
+    <html lang="en" className={`${inter.variable} ${libre_caslon.variable}`}>
       <body>
+        <SmoothScroller />
         <Header />
-        <main>{children}</main>
+        {/* We will wrap the children in the PageTransition component */}
+        <PageTransition>{children}</PageTransition>
         <Footer />
       </body>
     </html>
