@@ -5,17 +5,17 @@ import StoryComponent from './components/Story'; // Using the new name
 import About from './components/About';
 import Contact from './components/Contact';
 
+import Prints from './components/Prints'; // <-- Import the new component
+
 export default function Home() {
   return (
     <>
       <Hero />
-
-      {/* We are now mapping over the stories and passing each one to the component */}
       {stories.map((story) => (
         <StoryComponent key={story.id} story={story} />
       ))}
-
       <About />
+      <Prints /> {/* <-- Add it here */}
       <Contact />
     </>
   );
