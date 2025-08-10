@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import { Inter, Lora } from 'next/font/google'; // Import from next/font
 import './globals.css';
+import 'yet-another-react-lightbox/styles.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
