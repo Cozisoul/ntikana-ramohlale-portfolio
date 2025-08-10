@@ -1,100 +1,85 @@
 // src/app/components/Story.tsx
 'use client';
 
-// Step 1: Import necessary hooks and components
-import { useState } from 'react';
+import { useRef } from 'react';
 import Image from 'next/image';
 import type { Story } from '@/app/data/portfolio-data';
-import { motion } from 'framer-motion';
-import Lightbox from 'yet-another-react-lightbox';
-
-// (Optional but Recommended) Import plugins for a better experience
-import Captions from 'yet-another-react-lightbox/plugins/captions';
-import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
-import Zoom from 'yet-another-react-lightbox/plugins/zoom';
-import 'yet-another-react-lightbox/plugins/captions.css';
-import 'yet-another-react-lightbox/plugins/thumbnails.css';
-
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 export default function StoryComponent({ story }: { story: Story }) {
-  // Step 2: Add state to manage the lightbox
-  const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
+  // 1. We create a reference to the main wrapper of this story section.
+  const targetRef = useRef<HTMLDivElement>(null);
 
-  // Prepare the 'slides' for the lightbox from your story data
-  const slides = story.images.map((img) => ({
-    src: img.src,
-    width: img.width,
-    height: img.height,
-    title: img.alt, // Use alt text as the title
-    description: img.caption, // Use the caption for the description
-  }));
+  // 2. We use the 'useScroll' hook to track the scroll progress within this component.
+  // 'target' is our ref, and 'offset' defines when the animation starts and ends.
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ['start start', 'end end'],
+  });
+
+  // Combine the cover image and the gallery images into one array for mapping.
+  const allImages = [story.cover, ...story.images];
 
   return (
-    <motion.section
-      id={story.id}
-      className="py-12 md:py-20"
-      initial="initial"
-      whileInView="animate"
-      viewport={{ once: true, amount: 0.2 }}
-    >
-      {/* ... (The cover image and text block code remains the same) ... */}
-      <motion.div variants={fadeIn} className="relative w-full aspect-[3/2] md:aspect-[2/1]">
-        {/* ... */}
-      </motion.div>
-      <motion.div variants={fadeIn} className="container ...">
-        {/* ... */}
-      </motion.div>
-
-      {/* Step 3: Modify the gallery grid to be clickable */}
-      <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 mt-10 md:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {story.images.map((img, i) => (
-          <motion.figure
-            key={img.src}
-            variants={fadeIn}
-            transition={{ delay: i * 0.1 }}
-            // Add an onClick handler here
-            onClick={() => {
-              setIndex(i); // Set the index of the clicked image
-              setOpen(true); // Open the lightbox
-            }}
-            className="cursor-pointer" // Change cursor to indicate it's clickable
+    <section ref={targetRef} id={story.id} className="relative h-[400vh]">
+      {/* 3. This is the main "sticky" container that holds everything. */}
+      <div className="sticky top-0 h-screen bg-neutral-900 text-white">
+        {/* Main Text Block - Always visible at the top */}
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 text-center z-10 p-4">
+          <motion.h2
+            style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]) }}
+            className="font-serif text-3xl md:text-5xl"
           >
-            <motion.div
-              className="relative w-full overflow-hidden rounded bg-neutral-800"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Image
-                src={img.src}
-                alt={img.alt}
-                width={img.width}
-                height={img.height}
-                sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
-                className="object-cover w-full h-auto"
-                loading="lazy"
-              />
-            </motion.div>
-            {img.caption && (
-              <figcaption className="mt-2 text-sm text-neutral-400 italic">{img.caption}</figcaption>
-            )}
-          </motion.figure>
-        ))}
-      </div>
+            {story.title}
+          </motion.h2>
+          <motion.p
+            style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]) }}
+            className="text-neutral-400 mt-2"
+          >
+            {[story.year, story.location].filter(Boolean).join(' • ')}
+          </motion.p>
+        </div>
 
-      {/* Step 4: Add the Lightbox component itself */}
-      <Lightbox
-        open={open}
-        close={() => setOpen(false)}
-        index={index}
-        slides={slides}
-        // Enable plugins for a premium experience
-        plugins={[Captions, Thumbnails, Zoom]}
-      />
-    </motion.section>
+        {/* 4. We map over each image to create a "frame" for it. */}
+        {allImages.map((img, i) => {
+          // Calculate the start and end points for this specific image's animation.
+          const start = i / allImages.length;
+          const end = (i + 1) / allImages.length;
+
+          // 'useTransform' maps the overall scroll progress to this image's opacity.
+          // It will be fully visible only during its specific segment of the scroll.
+          const opacity = useTransform(scrollYProgress, [start, start + 0.05, end - 0.05, end], [0, 1, 1, 0]);
+          const scale = useTransform(scrollYProgress, [start, start + 0.05, end - 0.05, end], [0.8, 1, 1, 0.8]);
+          const y = useTransform(scrollYProgress, [start, end], ["0%", "-10%"]);
+
+
+          return (
+            <motion.div
+              key={img.src}
+              style={{ opacity, scale, y }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <div className="relative w-4/5 md:w-1/2 aspect-[4/3] rounded-lg overflow-hidden">
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover"
+                  priority={i === 0}
+                />
+              </div>
+            </motion.div>
+          );
+        })}
+
+        {/* The story description appears after the title fades */}
+        <motion.div
+            style={{ opacity: useTransform(scrollYProgress, [0.1, 0.2, 0.9, 1], [0, 1, 1, 0]) }}
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 text-center z-10 p-4 max-w-2xl"
+          >
+             <p className="leading-relaxed text-neutral-300">{story.description}</p>
+        </motion.div>
+      </div>
+    </section>
   );
 }
