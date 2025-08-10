@@ -21,6 +21,20 @@ export type Story = {
   images: StoryImage[];
 };
 
+export interface Client {
+  name: string;
+  logoSrc: string;
+}
+
+export const clients: Client[] = [
+  { name: 'EFF', logoSrc: '/images/logos/eff-logo.svg' },
+  { name: 'Msaki', logoSrc: '/images/logos/msaki-logo.svg' },
+  { name: 'Amos', logoSrc: '/images/logos/amos-logo.svg' },
+  { name: 'Thato Saul', logoSrc: '/images/logos/thato-saul-logo.svg' },
+  { name: 'SABC News', logoSrc: '/images/logos/sabc-logo.svg' },
+  { name: 'Rhodes University', logoSrc: '/images/logos/rhodes-university-logo.svg' },
+];
+
 // --- Your Complete Portfolio Content (6 Projects) ---
 
 export const stories: Story[] = [
